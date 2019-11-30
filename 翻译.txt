@@ -1,0 +1,112 @@
+＃YOLT＃
+
+##您只看过两次：卫星影像中的快速多尺度目标检测
+
+！[替代文字]（/ test_images / header.jpg？raw = true“”）
+
+
+____
+###截至2018年10月24日，YOLT已被[SIMRDWN]取代（https://github.com/CosmiQ/simrdwn）
+____
+
+
+YOLT是[YOLO v2]（https://pjreddie.com/darknet/yolov2/）框架的扩展，可以评估任意大小的卫星图像，并以每秒约50帧的速度运行。当前的应用包括车辆检测（汽车，飞机，轮船），建筑物检测和机场检测。
+
+YOLT代码更改src / *。c中的许多文件以允许进一步的功能。我们还围绕C函数构建了python包装器，以提高灵活性。我们使用YOLO的默认数据格式，该格式将图像和标签放置在不同的目录中。例如：
+
+    /data/images/train1.tif
+    /data/labels/train1.txt
+
+train1.txt文件的每一行都具有以下格式：
+
+    <对象类> <x> <y> <宽度> <高度>
+
+其中x，y，宽度和高度是相对于图像的宽度和高度。可以使用[LabelImg]（https://github.com/tzutalin/labelImg）创建标签，并使用/yolt/scripts/convert.py脚本将其转换为适当的格式。
+
+
+
+
+##安装＃
+
+以下已在Ubuntu 16.04.2上进行了测试
+
+1.安装[nvidia-docker]（https://github.com/NVIDIA/nvidia-docker）
+
+2.构建docker文件
+
+        nvidia-docker build -t yolt yolt_docker_name / path_to_yolt / docker
+
+3.启动Docker容器
+
+        nvidia-docker运行-it -v / raid：/ raid yolt_docker_name
+        ＃'/ raid'是您计算机的根目录，它将
+        ＃与docker容器共享
+
+4.运行Makefile
+
+        cd / path_to_yolt /
+        弄干净
+        使
+        
+---
+
+##执行＃
+
+命令应在docker文件中执行。要运行容器（名称为yolt_train0）：
+
+    nvidia-docker运行-it -v --name yolt_train0 yolt_docker_name
+
+
+＃＃＃ 救命
+    cd / path_to_yolt / scripts
+    python yolt2.py-帮助
+
+
+###火车（gpu_machine）
+
+
+    ＃例如火车船和飞机
+    cd / path_to_yolt / scripts
+    python yolt2.py \
+        -火车
+        --outname 3class_boat_plane \
+        --object_labels_str船，船港，飞机\
+        --cfg_file ave_standard.cfg \
+        --nbands 3 \
+        --train_images_list_file boat_airplane_all.txt \
+        --single_gpu_machine 0 \
+        --keep_valid_slices假\
+        --max_batches 60000 \
+        --gpu 0
+
+###验证（gpu_machine）
+
+    ＃例如在船，汽车和飞机上测试
+    cd / path_to_yolt / scripts
+    python yolt2.py \
+        --mode有效
+        --outname qgis_labels_all_boats_planes_cars_buffer \
+        --object_labels_str飞机，机场，船，船坞，汽车\
+        --cfg_file ave_standard.cfg \
+        --valid_weight_dir train_cowc_cars_qgis_boats_planes_cfg = ave_26x26_2017_11_28_23-11-36 \
+        --weight_file ave_standard_30000_tmp.weights \
+        --valid_testims_dir qgis_validation / all \
+        --keep_valid_slices假\
+        --valid_make_pngs True \
+        --valid_make_legend_and_title否\
+        --edge_buffer_valid 1 \
+        --valid_box_rescale_frac 1 \
+        --plot_thresh_str 0.4 \
+        --slice_sizes_str 416 \
+        --slice_overlap 0.2 \
+        --gpu 2
+
+
+---
+
+＃＃ 去做 ＃
+1.包含训练/测试示例
+2.上传数据准备脚本
+3.描述多光谱数据处理
+4. YOLO v3的初步结果
+5.描述展示
